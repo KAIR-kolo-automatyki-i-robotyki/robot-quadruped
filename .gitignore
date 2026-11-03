@@ -1,0 +1,5 @@
+venv/
+mujoco_menagerie/
+__pycache__/
+*.pyc
+_tymczasowy.urdf
