@@ -2,6 +2,10 @@
 
 Uczymy naszego czworonoga chodzić w symulatorze MuJoCo metodą uczenia ze wzmocnieniem (RL), bez ręcznego liczenia kinematyki.
 
+## Model 3D robota
+
+Pliki do druku i model: [Quadruped II na Printables](https://www.printables.com/model/1451339-quadruped-ii/files)
+
 **Instrukcja instalacji krok po kroku:** https://claude.ai/artifact/YJxWJxYD8qXG3th7q5TSUB
 
 ## Co gdzie leży
