@@ -3,10 +3,11 @@ Zamienia nasz URDF na plik MuJoCo (robot.xml) gotowy do testu:
 - odpina robota od świata (może spaść i chodzić),
 - dodaje podłogę i światło,
 - dodaje silnik pozycyjny do każdego przegubu,
-- sam poprawia ścieżki do plików STL i dopisuje znacznik <mujoco>.
+- sam poprawia ścieżki do plików STL i dopisuje znacznik <mujoco>,
+- zamienia proste makra xacro i pliki .dae (MuJoCo ich nie czyta).
 Użycie:  python sim/przygotuj_robota.py model/robot.urdf
 """
-import sys, os, glob
+import sys, os, glob, re
 import xml.etree.ElementTree as ET
 import mujoco
 
@@ -17,9 +18,19 @@ KP = 20                 # "siła" silników: drgania -> zmniejsz, siada -> zwię
 
 plik_urdf = sys.argv[1] if len(sys.argv) > 1 else "robot.urdf"
 
+# 0. Proste makra xacro: <xacro:property name="X" value="V"/> i ${X} w tekście
+tekst = open(plik_urdf, encoding="utf-8").read()
+for nazwa_wl, wartosc in re.findall(r'<xacro:property\s+name="([^"]+)"\s+value="([^"]*)"\s*/>', tekst):
+    tekst = tekst.replace("${" + nazwa_wl + "}", wartosc)
+if "${" in tekst:
+    sys.exit("BŁĄD: w URDF zostały makra xacro (${...}), których skrypt nie umie zamienić. "
+             "Zamień plik na zwykły URDF komendą xacro.")
+robot = ET.fromstring(tekst.encode("utf-8"))
+for wl in [e for e in robot if "property" in e.tag]:
+    robot.remove(wl)
+drzewo = ET.ElementTree(robot)
+
 # 1. Znajdź główną część robota (link, który nie jest "dzieckiem" żadnego przegubu)
-drzewo = ET.parse(plik_urdf)
-robot = drzewo.getroot()
 linki = [l.get("name") for l in robot.findall("link")]
 dzieci = {j.find("child").get("link") for j in robot.findall("joint")}
 korzen = [l for l in linki if l not in dzieci][0]
@@ -37,6 +48,21 @@ folder_urdf = os.path.dirname(os.path.abspath(plik_urdf))
 folder_siatek = None
 for siatka in robot.iter("mesh"):
     nazwa = os.path.basename(siatka.get("filename"))
+    if nazwa.lower().endswith(".dae"):
+        # MuJoCo nie czyta plików .dae - zamieniamy je na .stl (biblioteka trimesh)
+        znalezione = glob.glob(os.path.join(folder_urdf, "**", nazwa), recursive=True)
+        if not znalezione:
+            sys.exit(f"BŁĄD: nie znalazłem pliku {nazwa} w folderze z URDF.")
+        nowa_nazwa = nazwa[:-4] + "_z_dae.stl"
+        nowy_plik = os.path.join(os.path.dirname(znalezione[0]), nowa_nazwa)
+        if not os.path.exists(nowy_plik):
+            try:
+                import trimesh
+            except ImportError:
+                sys.exit("BŁĄD: URDF używa plików .dae. Zainstaluj: pip install trimesh pycollada")
+            trimesh.load(znalezione[0], force="mesh").export(nowy_plik)
+            print("  zamieniono", nazwa, "->", nowa_nazwa)
+        nazwa = nowa_nazwa
     siatka.set("filename", nazwa)
     if folder_siatek is None:
         znalezione = glob.glob(os.path.join(folder_urdf, "**", nazwa), recursive=True)

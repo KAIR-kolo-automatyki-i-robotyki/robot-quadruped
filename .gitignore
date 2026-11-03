@@ -3,3 +3,4 @@ mujoco_menagerie/
 __pycache__/
 *.pyc
 _tymczasowy.urdf
+*_z_dae.stl
