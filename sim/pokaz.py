@@ -13,6 +13,7 @@
 #      strzalki gora / dol     komenda predkosci do przodu +/- 0,05 m/s
 #      strzalki lewo / prawo   komenda obrotu +/- 0,2 rad/s
 #      Enter                   komenda = stoj
+#      Ctrl + P                zrzut ekranu -> folder zrzuty/ (zrzut_001.png, 002...)
 #
 #  Po kazdej probie terminal pokazuje, ile punktow dal kazdy skladnik
 #  nagrody (jak w trening.py). Zamknij okno, zeby skonczyc.
@@ -76,7 +77,28 @@ def klawisz(kod):
     print(f"komenda: vx {k[0]:+.2f} m/s, vy {k[1]:+.2f} m/s, obrot {k[2]:+.1f} rad/s")
 
 
+# --- zrzuty ekranu ---------------------------------------------------------------
+# Viewer zawsze zapisuje zrzut jako screenshot.png (w folderze, z ktorego
+# uruchomiono program) i nadpisuje poprzedni. Petla co chwile sprawdza, czy
+# taki plik sie pojawil, i przenosi go do zrzuty/ pod kolejnym numerem.
+FOLDER_ZRZUTOW = "zrzuty"
+
+
+def pilnuj_zrzutow():
+    plik = "screenshot.png"
+    if not os.path.exists(plik) or time.time() - os.path.getmtime(plik) < 0.3:
+        return                                       # brak albo jeszcze sie zapisuje
+    os.makedirs(FOLDER_ZRZUTOW, exist_ok=True)
+    nr = 1
+    while os.path.exists(os.path.join(FOLDER_ZRZUTOW, f"zrzut_{nr:03d}.png")):
+        nr += 1
+    cel = os.path.join(FOLDER_ZRZUTOW, f"zrzut_{nr:03d}.png")
+    os.replace(plik, cel)
+    print(f"Zrzut ekranu zapisany: {cel}")
+
+
 obs, _ = env.reset()
+krok = 0
 with mujoco.viewer.launch_passive(env.model, env.data, key_callback=klawisz) as viewer:
     with viewer.lock():
         viewer.cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
@@ -101,6 +123,9 @@ with mujoco.viewer.launch_passive(env.model, env.data, key_callback=klawisz) as 
                                f"predkosc robota {(env._R().T @ env.data.qvel[0:3])[0]:+.2f} m/s",
                                None)])
         viewer.sync()
+        krok += 1
+        if krok % 10 == 0:                           # ok. 5 razy na sekunde
+            pilnuj_zrzutow()
         if koniec or limit:
             print(f"\nproba {proba}: {'UPADEK' if info['upadek'] else 'koniec czasu'} "
                   f"po {info['czas']:.1f} s, nagroda {nagroda:.0f}")
