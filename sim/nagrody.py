@@ -42,7 +42,7 @@ WAGI = {
     "zmiana_akcji":    -0.02,    # szarpanie - nagle zmiany polecen
     "limity_przegubow": -2.0,    # dojezdzanie do krancow zakresu przegubow
     "kolizje":         -1.0,     # cos innego niz stopa dotyka ziemi
-    "poza":            -0.05,    # nogi daleko od pozy "stoi" (porzadek w ruchach)
+    "poza":            -0.5,    # nogi daleko od pozy "stoi" (porzadek w ruchach)
     "slizganie_stop":  -0.1,     # stopa na ziemi, a jedzie po podlodze
     "upadek":         -10.0,     # jednorazowo, gdy proba konczy sie upadkiem
 }
