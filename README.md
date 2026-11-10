@@ -6,7 +6,7 @@ Uczymy naszego czworonoga chodzić w symulatorze MuJoCo metodą uczenia ze wzmoc
 
 Pliki do druku i model: [Quadruped II na Printables](https://www.printables.com/model/1451339-quadruped-ii/files)
 
-**Instrukcja instalacji krok po kroku:** https://claude.ai/artifact/YJxWJxYD8qXG3th7q5TSUB
+**Instrukcja instalacji krok po kroku:** https://politechnikawroclawska-my.sharepoint.com/:w:/g/personal/279265_student_pwr_edu_pl/IQBT31L1DNgcQ4rF79SJK6GqAQE_5hLIWWj51GCj2TZ2GRE?e=x8Usrh
 
 ## Co gdzie leży
 
