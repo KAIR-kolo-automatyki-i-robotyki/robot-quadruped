@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 _tymczasowy.urdf
 *_z_dae.stl
+model/quadruped.xml
